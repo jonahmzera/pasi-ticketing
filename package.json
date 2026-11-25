@@ -1,0 +1,23 @@
+{
+  "name": "pasi",
+  "private": true,
+  "description": "Event ticketing for Kenyan venues: M-Pesa STK push, QR tickets, gate scanning, organizer analytics, group planning.",
+  "workspaces": [
+    "server",
+    "web",
+    "business"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n api,fan,business -c green,magenta,cyan \"npm run dev -w server\" \"npm run dev -w web\" \"npm run dev -w business\"",
+    "build": "npm run build -w web && npm run build -w business && npm run typecheck -w server",
+    "start": "npm start -w server",
+    "seed": "npm run seed -w server",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w web && npm run typecheck -w business"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.7"
+  }
+}
