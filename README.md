@@ -50,6 +50,10 @@ Other commands:
 - `npm run typecheck` typechecks everything.
 - `npm run build && npm start` serves the built fan app on :4000 and the built business app on :4100.
 
+## Putting it online
+
+Follow **[DEPLOY.md](DEPLOY.md)**. It covers MongoDB Atlas (database), Render (the two API servers, from `render.yaml`) and Vercel (the two websites, from `web/vercel.json` and `business/vercel.json`).
+
 ## Plugging in real services
 
 Copy `.env.example` to `.env`. Each section of that file says where to get the values: MongoDB Atlas, Daraja keys with an HTTPS callback tunnel, and Africa's Talking for SMS.

@@ -1,4 +1,5 @@
 export type Theme = 'sunset' | 'lime' | 'violet' | 'ocean';
+export type TicketStyle = 'stub' | 'admit' | 'boarding' | 'holo';
 
 export interface OrgRef { id: string; name: string; slug: string; verified: boolean }
 
@@ -22,7 +23,7 @@ export interface EventDetail extends Omit<EventCard, 'org'> {
 export interface TicketLite {
   code: string; status: 'valid' | 'used' | 'void'; holderName?: string; typeName?: string; admits: number; checkedInAt?: string;
 }
-export interface EventLite { slug: string; title: string; venueName?: string; startsAt: string; theme: Theme; category?: string; posterUrl?: string; address?: string; lat?: number; lng?: number; endsAt?: string }
+export interface EventLite { slug: string; title: string; venueName?: string; startsAt: string; theme: Theme; category?: string; posterUrl?: string; address?: string; lat?: number; lng?: number; endsAt?: string; ticketStyle?: TicketStyle }
 
 export interface OrderView {
   ref: string; status: 'pending' | 'processing' | 'paid' | 'failed' | 'expired' | 'review' | 'refunded';

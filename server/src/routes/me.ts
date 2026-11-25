@@ -58,7 +58,7 @@ me.get('/me/tickets', async (req, res) => {
     tickets: tickets.map((t) => {
       const e = events.get(String(t.event))!;
       return { code: t.code, status: t.status, holderName: t.holderName, typeName: t.typeName, admits: t.admits, checkedInAt: t.checkedInAt,
-        event: { slug: e.slug, title: e.title, startsAt: e.startsAt, venueName: e.venueName, theme: e.theme, category: e.category, posterUrl: e.posterUrl } };
+        event: { slug: e.slug, title: e.title, startsAt: e.startsAt, venueName: e.venueName, address: e.address, theme: e.theme, category: e.category, posterUrl: e.posterUrl, ticketStyle: e.ticketStyle } };
     }).sort((a, b) => +new Date(a.event.startsAt) - +new Date(b.event.startsAt)),
     pending: pending.map((o) => ({ ref: o.ref, status: o.status, total: o.total, title: (o.event as unknown as { title: string })?.title, review: o.reviewReason })),
   });

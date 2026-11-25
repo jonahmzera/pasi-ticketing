@@ -1,8 +1,9 @@
 import { motion } from 'motion/react';
-import { Download, MapPin, Users } from 'lucide-react';
+import { Download } from 'lucide-react';
+import { TicketArt } from '@shared/tickets';
 import type { EventLite, TicketLite } from '@shared/types';
 import { LS } from '@/lib/hooks';
-import { cn, fmtDate, fmtTime, themeGradient, THEMES } from '@shared/utils';
+import { fmtDate, fmtTime, THEMES } from '@shared/utils';
 import { Button } from '@shared/ui';
 
 export interface SavedTicket extends TicketLite { event: EventLite }
@@ -20,40 +21,11 @@ export const offline = {
 };
 
 export function TicketCard({ t, ev, index = 0, actions }: { t: TicketLite; ev: EventLite; index?: number; actions?: React.ReactNode }) {
-  const dead = t.status !== 'valid';
   return (
-    <motion.div initial={{ opacity: 0, y: 24, rotateX: 8 }} animate={{ opacity: 1, y: 0, rotateX: 0 }} transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-      className="mx-auto w-full max-w-sm">
-      <div className="overflow-hidden rounded-[28px] bg-white text-zinc-900 shadow-[0_30px_80px_-30px_rgba(0,0,0,.8)]">
-        <div className="grain relative p-5 text-white" style={{ backgroundImage: themeGradient(ev.theme) }}>
-          {ev.posterUrl && <img src={ev.posterUrl} alt="" className="absolute inset-0 size-full object-cover opacity-40 mix-blend-luminosity" />}
-          <div className="relative">
-            <div className="text-xs font-semibold uppercase tracking-wider text-white/80">{fmtDate(ev.startsAt)} · {fmtTime(ev.startsAt)}</div>
-            <h3 className="mt-1.5 text-2xl font-extrabold leading-tight tracking-tight">{ev.title}</h3>
-            {ev.venueName && <div className="mt-1 flex items-center gap-1 text-sm text-white/85"><MapPin className="size-3.5" />{ev.venueName}</div>}
-          </div>
-        </div>
-        {/* perforation */}
-        <div className="relative h-0 border-t-2 border-dashed border-zinc-200">
-          <span className="absolute -left-3 -top-3 size-6 rounded-full bg-bg" /><span className="absolute -right-3 -top-3 size-6 rounded-full bg-bg" />
-        </div>
-        <div className="relative grid place-items-center px-6 pb-4 pt-6">
-          <img src={`/api/tickets/${t.code}/qr.svg`} alt="Ticket QR code — show at the gate" className={cn('size-56', dead && 'opacity-15')} />
-          {dead && (
-            <span className="absolute top-1/2 -translate-y-1/2 -rotate-12 rounded-xl border-4 px-4 py-1 text-3xl font-black tracking-wider"
-              style={{ color: t.status === 'used' ? '#dc2626' : '#71717a', borderColor: 'currentColor' }}>
-              {t.status === 'used' ? 'SCANNED' : 'TRANSFERRED'}
-            </span>
-          )}
-          <div className="mt-2 font-mono text-xs tracking-wider text-zinc-500">{t.code}</div>
-        </div>
-        <div className="grid grid-cols-2 gap-3 px-6 pb-6 text-sm">
-          <div><div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Ticket</div><div className="font-bold">{t.typeName || 'Ticket'}</div></div>
-          <div><div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Name</div><div className="truncate font-bold">{t.holderName || '—'}</div></div>
-          {t.admits > 1 && <div className="col-span-2 flex items-center gap-1.5 rounded-lg bg-zinc-100 px-3 py-2 text-xs font-semibold"><Users className="size-3.5" /> Admits {t.admits} people</div>}
-        </div>
-      </div>
-      <div className="mt-3 flex justify-center gap-2">
+    <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+      className="mx-auto flex w-full max-w-sm flex-col items-center">
+      <TicketArt style={ev.ticketStyle} t={t} ev={ev} />
+      <div className="mt-6 flex justify-center gap-2">
         <Button size="sm" variant="secondary" onClick={() => downloadTicket(t, ev)}><Download className="size-4" />Save image</Button>
         {actions}
       </div>

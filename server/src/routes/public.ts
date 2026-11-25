@@ -170,7 +170,7 @@ pub.get('/tickets/:code', async (req, res) => {
   res.json({
     code: t.code, status: t.status, holderName: t.holderName, holderPhone: maskPhone(t.holderPhone), typeName: t.typeName, admits: t.admits,
     isComp: t.isComp, checkedInAt: t.checkedInAt, replacedBy: t.replacedBy, orderRef: o?.ref,
-    event: { slug: e.slug, title: e.title, venueName: e.venueName, address: e.address, startsAt: e.startsAt, endsAt: e.endsAt, theme: e.theme, category: e.category, posterUrl: e.posterUrl, lat: e.lat, lng: e.lng },
+    event: { slug: e.slug, title: e.title, venueName: e.venueName, address: e.address, startsAt: e.startsAt, endsAt: e.endsAt, theme: e.theme, category: e.category, posterUrl: e.posterUrl, lat: e.lat, lng: e.lng, ticketStyle: e.ticketStyle },
   });
 });
 

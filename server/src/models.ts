@@ -52,6 +52,7 @@ const EventSchema = new Schema({
   endsAt: Date,
   posterUrl: String,
   theme: { type: String, default: 'sunset' },
+  ticketStyle: { type: String, enum: ['stub', 'admit', 'boarding', 'holo'], default: 'stub' },
   status: { type: String, enum: ['draft', 'published', 'cancelled'], default: 'draft', index: true },
   maxPerBuyer: { type: Number, default: 10 },
   gatePin: String,

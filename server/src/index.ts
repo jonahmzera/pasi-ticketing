@@ -27,6 +27,7 @@ function makeApp(mounts: [string, Router][], distDir: string, extraHeaders: Reco
     next();
   });
   app.use(express.json({ limit: '2mb' }));
+  app.get('/api/health', (_req, res) => res.json({ ok: true }));
   for (const [prefix, router] of mounts) app.use(prefix, router);
   app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found' }));
   if (existsSync(distDir)) {
@@ -43,8 +44,11 @@ function makeApp(mounts: [string, Router][], distDir: string, extraHeaders: Reco
 }
 
 const service = (process.env.SERVICE || 'all').toLowerCase();
+// Hosts like Render hand each service one PORT; a business-only service listens there.
+const businessPort = service === 'business' && process.env.PORT ? Number(process.env.PORT) : config.businessPort;
 await connectDb();
-await seedIfEmpty();
+// Demo data only for local runs (embedded DB) or when explicitly asked — never into a real database by accident.
+if (!config.mongoUri || process.env.SEED_DEMO === 'true') await seedIfEmpty();
 
 if (service === 'all' || service === 'public') {
   makeApp([['/api', pub], ['/api', me]], path.join(ROOT, 'web', 'dist')).listen(config.port, () => {
@@ -57,5 +61,5 @@ if (service === 'all' || service === 'business') {
   // Business system: never indexed by search engines, never framed by other sites.
   makeApp([['/api/org', org], ['/api/gate', gate]], path.join(ROOT, 'business', 'dist'), {
     'X-Robots-Tag': 'noindex, nofollow', 'X-Frame-Options': 'DENY', 'Cache-Control': 'no-store',
-  }).listen(config.businessPort, () => console.log(`[business api] http://localhost:${config.businessPort}`));
+  }).listen(businessPort, () => console.log(`[business api] http://localhost:${businessPort}`));
 }

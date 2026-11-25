@@ -7,7 +7,8 @@ import 'leaflet/dist/leaflet.css';
 import { toast } from 'sonner';
 import { MapPin, Plus, Search, Trash2 } from 'lucide-react';
 import { api, post, put } from '@shared/api';
-import type { Theme } from '@shared/types';
+import type { Theme, TicketStyle } from '@shared/types';
+import { SAMPLE_QR, TICKET_STYLES, TicketArt } from '@shared/tickets';
 import { cn, themeGradient } from '@shared/utils';
 import { CATEGORY_ICONS, Poster } from '@shared/event';
 import { Button, Field, Input, Select, Skeleton, Textarea } from '@shared/ui';
@@ -15,7 +16,7 @@ import { Button, Field, Input, Select, Skeleton, Textarea } from '@shared/ui';
 interface TT { id?: string; name: string; price: number | string; quantity: number | string; admits: number | string; description?: string; sold?: number }
 interface Promo { code: string; percentOff: number | string; maxUses?: number | string; used?: number }
 interface Form {
-  title: string; category: string; theme: Theme; posterUrl: string; description: string; startsAt: string; endsAt: string; ageLimit: string; dressCode: string;
+  title: string; category: string; theme: Theme; ticketStyle: TicketStyle; posterUrl: string; description: string; startsAt: string; endsAt: string; ageLimit: string; dressCode: string;
   venueName: string; address: string; lat?: number; lng?: number; maxPerBuyer: number | string; gatePin: string; lineup: string; ticketTypes: TT[]; promos: Promo[];
 }
 
@@ -37,7 +38,7 @@ export default function EventEditor() {
   const qc = useQueryClient();
   const existing = useQuery({ queryKey: ['org-event', id], enabled: !!id, queryFn: () => api<Record<string, unknown>>(`/org/events/${id}`) });
   const [f, setF] = useState<Form>({
-    title: '', category: 'Party', theme: 'sunset', posterUrl: '', description: '', startsAt: '', endsAt: '', ageLimit: '', dressCode: '',
+    title: '', category: 'Party', theme: 'sunset', ticketStyle: 'stub', posterUrl: '', description: '', startsAt: '', endsAt: '', ageLimit: '', dressCode: '',
     venueName: '', address: '', lat: -1.2864, lng: 36.8172, maxPerBuyer: 10, gatePin: '', lineup: '',
     ticketTypes: [{ name: 'Early Bird', price: 800, quantity: 100, admits: 1 }, { name: 'Regular', price: 1200, quantity: 300, admits: 1 }], promos: [],
   });
@@ -47,7 +48,7 @@ export default function EventEditor() {
     const e = existing.data as Record<string, any> | undefined; // eslint-disable-line @typescript-eslint/no-explicit-any
     if (!e) return;
     setF({
-      title: e.title, category: e.category, theme: e.theme, posterUrl: e.posterUrl || '', description: e.description || '', startsAt: toLocal(e.startsAt), endsAt: toLocal(e.endsAt),
+      title: e.title, category: e.category, theme: e.theme, ticketStyle: e.ticketStyle || 'stub', posterUrl: e.posterUrl || '', description: e.description || '', startsAt: toLocal(e.startsAt), endsAt: toLocal(e.endsAt),
       ageLimit: e.ageLimit ? String(e.ageLimit) : '', dressCode: e.dressCode || '', venueName: e.venueName, address: e.address || '', lat: e.lat, lng: e.lng,
       maxPerBuyer: e.maxPerBuyer, gatePin: e.gatePin || '', lineup: (e.lineup || []).join(', '),
       ticketTypes: e.ticketTypes.map((t: TT) => ({ id: t.id, name: t.name, price: t.price, quantity: t.quantity, admits: t.admits, description: t.description, sold: t.sold })),
@@ -127,6 +128,26 @@ export default function EventEditor() {
                   <Field label="Admits"><Input type="number" min={1} value={t.admits} onChange={(e) => upTT(i, 'admits', e.target.value)} /></Field>
                   <Button type="button" variant="ghost" size="icon" aria-label="Remove ticket type" disabled={!!t.sold} onClick={() => set('ticketTypes', f.ticketTypes.filter((_, j) => j !== i))}><Trash2 className="size-4" /></Button>
                 </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="card p-5">
+            <h2 className="font-semibold">Ticket design</h2>
+            <p className="mt-1 text-xs text-muted">This is what buyers see on their phone and show at the gate. Every design keeps the QR on white so it scans fast.</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Ticket design">
+              {TICKET_STYLES.map((d) => (
+                <button type="button" key={d.id} role="radio" aria-checked={f.ticketStyle === d.id} onClick={() => set('ticketStyle', d.id)}
+                  className={cn('group overflow-hidden rounded-2xl border bg-surface-2 text-left transition', f.ticketStyle === d.id ? 'border-brand ring-1 ring-brand' : 'border-line hover:border-line-strong')}>
+                  <div className="pointer-events-none relative h-56 overflow-hidden bg-bg">
+                    <div className="absolute left-1/2 top-4 w-[384px] origin-top -translate-x-1/2 scale-[.55]">
+                      <TicketArt style={d.id} t={{ code: 'PREVIEW123.abcdefgh', status: 'valid', holderName: 'Wanjiku M.', typeName: f.ticketTypes[0]?.name || 'Regular', admits: 1 }}
+                        ev={{ slug: 'preview', title: f.title || 'Your event', venueName: f.venueName || 'Your venue', address: f.address, startsAt: fromLocal(f.startsAt) || new Date().toISOString(), theme: f.theme, posterUrl: f.posterUrl || undefined, category: f.category }}
+                        qrSrc={SAMPLE_QR} />
+                    </div>
+                  </div>
+                  <div className="p-3"><div className="font-semibold">{d.name}{d.id === 'stub' && <span className="ml-2 text-xs font-normal text-muted">default</span>}</div><div className="text-xs text-muted">{d.blurb}</div></div>
+                </button>
               ))}
             </div>
           </section>

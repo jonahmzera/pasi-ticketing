@@ -6,7 +6,8 @@ import { ArrowRight, BadgeCheck, CalendarDays, MapPin, Search, Sparkles } from '
 import { api } from '@shared/api';
 import type { EventCard as EventCardT } from '@shared/types';
 import { fmtTime, ksh, relDay } from '@shared/utils';
-import { CategoryIcon, EventCard, Poster } from '@shared/event';
+import { CategoryIcon, EventCard } from '@shared/event';
+import { FeaturedRing } from '@/components/featured-ring';
 import { Badge, Empty, Segmented, Skeleton } from '@shared/ui';
 
 type When = '' | 'today' | 'weekend' | 'week';
@@ -20,7 +21,6 @@ export default function Discover() {
   const { data: events, isLoading } = useQuery({ queryKey: ['events', params], queryFn: () => api<EventCardT[]>('/events?' + params) });
   const { data: cats } = useQuery({ queryKey: ['categories'], queryFn: () => api<{ category: string; count: number }[]>('/categories') });
   const { data: featured } = useQuery({ queryKey: ['events', ''], queryFn: () => api<EventCardT[]>('/events') });
-  const hero = featured?.find((e) => !e.soldOut) ?? featured?.[0];
   const filtering = !!(q || when || category);
 
   return (
@@ -39,28 +39,8 @@ export default function Discover() {
         </div>
       </section>
 
-      {/* Featured */}
-      {!filtering && hero && (
-        <motion.section initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-10">
-          <Link to={`/e/${hero.slug}`} className="group block">
-            <Poster ev={hero} className="aspect-[4/5] rounded-3xl sm:aspect-[21/9]">
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8">
-                <Badge tone="brand" className="mb-3"><Sparkles className="size-3" />Featured · {relDay(hero.startsAt)}</Badge>
-                <h2 className="max-w-xl text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">{hero.title}</h2>
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-white/85">
-                  <span className="flex items-center gap-1.5"><CalendarDays className="size-4" />{relDay(hero.startsAt)} · {fmtTime(hero.startsAt)}</span>
-                  <span className="flex items-center gap-1.5"><MapPin className="size-4" />{hero.venueName}</span>
-                  {hero.org?.verified && <span className="flex items-center gap-1.5"><BadgeCheck className="size-4 text-info" />{hero.org.name}</span>}
-                </div>
-                <div className="mt-5 inline-flex h-12 items-center gap-2 rounded-2xl bg-white px-5 font-semibold text-zinc-900 transition group-hover:gap-3">
-                  Get tickets{hero.minPrice ? ` · from ${ksh(hero.minPrice)}` : ''} <ArrowRight className="size-4" />
-                </div>
-              </div>
-            </Poster>
-          </Link>
-        </motion.section>
-      )}
+      {/* Featured: 3D ring + poster flow */}
+      {!filtering && featured && featured.length > 0 && <FeaturedRing events={featured} />}
 
       {/* Filters */}
       <div className="sticky top-16 z-30 -mx-4 mb-6 space-y-3 bg-bg/80 px-4 py-3 backdrop-blur-xl">

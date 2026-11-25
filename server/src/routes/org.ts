@@ -83,6 +83,9 @@ org.get('/overview', async (req, res) => {
   const sum = (k: 'gross' | 'net' | 'platformFee' | 'mpesaCost' | 'sold' | 'orders') => events.reduce((a, e) => a + e[k], 0);
   const fanRows = await Order.aggregate([{ $match: { event: { $in: ids }, status: 'paid' } }, { $group: { _id: '$phone', events: { $addToSet: '$event' } } }]);
   const review = await Order.find({ event: { $in: ids }, status: 'review' }).populate('event', 'title').lean();
+  const recentRaw = await Order.find({ event: { $in: ids }, status: { $in: ['paid', 'review'] } }).sort({ paidAt: -1, updatedAt: -1 }).limit(8).populate('event', 'title').lean();
+  const recent = recentRaw.map((r) => ({ id: String(r._id), name: r.name, total: r.total, status: r.status, source: r.source, qty: r.items.reduce((n, i) => n + (i.qty ?? 0), 0),
+    at: r.paidAt ?? (r as unknown as { updatedAt: Date }).updatedAt, title: (r.event as unknown as { title: string })?.title }));
   // Last 30 days of revenue across all events
   const since = new Date(Date.now() - 30 * 864e5);
   const daily = await Order.aggregate([
@@ -96,6 +99,7 @@ org.get('/overview', async (req, res) => {
     fans: fanRows.length, repeatFans: fanRows.filter((r) => r.events.length > 1).length,
     followers: await User.countDocuments({ follows: o._id }),
     daily: daily.map((d) => ({ date: d._id, revenue: d.revenue, orders: d.orders })),
+    recent,
     review: review.map((r) => ({ id: String(r._id), ref: r.ref, phone: r.phone, total: r.total, receipt: r.mpesaReceipt, reason: r.reviewReason, title: (r.event as unknown as { title: string })?.title })),
   });
 });
@@ -112,6 +116,7 @@ async function saveEvent(orgId: Types.ObjectId, b: Record<string, unknown>, exis
     lat: b.lat === '' || b.lat == null ? undefined : Number(b.lat), lng: b.lng === '' || b.lng == null ? undefined : Number(b.lng),
     startsAt: new Date(String(b.startsAt)), endsAt: b.endsAt ? new Date(String(b.endsAt)) : undefined,
     posterUrl: String(b.posterUrl || '') || undefined, theme: String(b.theme || 'sunset'),
+    ticketStyle: (['stub', 'admit', 'boarding', 'holo'] as const).find((s) => s === b.ticketStyle) ?? 'stub',
     maxPerBuyer: Math.max(1, Number(b.maxPerBuyer) || 10),
     gatePin: String(b.gatePin || '').trim() || existing?.gatePin || String(Math.floor(1000 + Math.random() * 9000)),
     ageLimit: b.ageLimit ? Number(b.ageLimit) : undefined, dressCode: String(b.dressCode || '') || undefined,

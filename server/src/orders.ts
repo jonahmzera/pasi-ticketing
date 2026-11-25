@@ -237,7 +237,7 @@ export async function orderView(o: OrderDoc) {
     ref: o.ref, status: o.status, total: o.total, subtotal: o.subtotal, discount: o.discount, phone: o.phone,
     receipt: o.mpesaReceipt ?? null, message: o.resultDesc ?? null, review: o.reviewReason ?? null,
     holdExpiresAt: o.holdExpiresAt, createdAt: (o as unknown as { createdAt: Date }).createdAt,
-    event: ev && { slug: ev.slug, title: ev.title, venueName: ev.venueName, startsAt: ev.startsAt, theme: ev.theme, category: ev.category, posterUrl: ev.posterUrl },
+    event: ev && { slug: ev.slug, title: ev.title, venueName: ev.venueName, address: ev.address, startsAt: ev.startsAt, theme: ev.theme, category: ev.category, posterUrl: ev.posterUrl, ticketStyle: ev.ticketStyle },
     items: o.items.map((i) => ({ name: i.name, qty: i.qty, unitPrice: i.unitPrice })),
     tickets: tickets.map((t) => ({ code: t.code, status: t.status, holderName: t.holderName, typeName: t.typeName, admits: t.admits, checkedInAt: t.checkedInAt })),
   };

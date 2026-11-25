@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
 import { Bell, Compass, Download, Ticket, User, Users } from 'lucide-react';
 import { useMe } from '@/lib/hooks';
+import { GlassNav } from './glass-nav';
 import { cn } from '@shared/utils';
 import { Logo } from '@shared/brand';
 export { Logo };
@@ -36,14 +37,7 @@ export function AppShell() {
       <header className="sticky top-0 z-40 border-b border-line/60 bg-bg/75 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
           <Logo />
-          <nav className="ml-8 hidden items-center gap-1 md:flex" aria-label="Main">
-            {NAV.map((n) => (
-              <NavLink key={n.to} to={n.to} end={n.end}
-                className={({ isActive }) => cn('flex h-10 items-center gap-2 rounded-xl px-3.5 text-sm font-medium transition', isActive ? 'bg-surface-3 text-fg' : 'text-muted hover:text-fg')}>
-                <n.icon className="size-4" />{n.label}
-              </NavLink>
-            ))}
-          </nav>
+          <GlassNav items={NAV} compact className="ml-8 hidden md:grid" />
           <div className="flex-1" />
           {install && (
             <button onClick={install} className="flex h-10 items-center gap-2 rounded-xl border border-line px-3 text-sm font-medium text-muted transition hover:text-fg">
@@ -65,18 +59,7 @@ export function AppShell() {
         </AnimatePresence>
       </main>
 
-      <nav aria-label="Main" className="fixed inset-x-3 bottom-[calc(.75rem+env(safe-area-inset-bottom))] z-40 grid grid-cols-4 rounded-2xl border border-line bg-surface/85 p-1.5 shadow-[0_20px_50px_-10px_rgba(0,0,0,.7)] backdrop-blur-xl md:hidden">
-        {NAV.map((n) => (
-          <NavLink key={n.to} to={n.to} end={n.end}
-            className={({ isActive }) => cn('relative flex h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium transition', isActive ? 'text-fg' : 'text-subtle')}>
-            {({ isActive }) => (<>
-              {isActive && <motion.span layoutId="tab" className="absolute inset-0 rounded-xl bg-surface-3" transition={{ type: 'spring', bounce: 0.2, duration: 0.45 }} />}
-              <n.icon className={cn('relative size-5', isActive && 'text-brand-soft')} />
-              <span className="relative">{n.label}</span>
-            </>)}
-          </NavLink>
-        ))}
-      </nav>
+      <GlassNav items={NAV} className="fixed inset-x-3 bottom-[calc(.75rem+env(safe-area-inset-bottom))] z-40 md:hidden" />
     </div>
   );
 }

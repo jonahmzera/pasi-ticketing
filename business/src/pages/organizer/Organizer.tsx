@@ -34,11 +34,11 @@ function OrgLayout({ org }: { org: Org }) {
   const qc = useQueryClient();
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[260px_1fr]">
-      <aside className="sticky top-0 z-30 border-b border-line bg-bg/85 backdrop-blur-xl lg:h-dvh lg:border-b-0 lg:border-r">
+      <aside className="sticky top-0 z-30 border-b border-white/10 bg-black/60 backdrop-blur-2xl lg:h-dvh lg:border-b-0 lg:border-r">
         <div className="flex h-16 items-center justify-between px-5"><Logo suffix="Business" to="/" /></div>
         <nav className="no-scrollbar flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:pb-0">
           {NAV.map((n) => (
-            <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => cn('flex h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 text-sm font-medium transition', isActive ? 'bg-surface-3 text-fg' : 'text-muted hover:bg-surface-2 hover:text-fg')}>
+            <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => cn('flex h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 text-sm font-medium transition', isActive ? 'bg-white/10 text-fg shadow-[inset_0_1px_0_rgba(255,255,255,.12)]' : 'text-muted hover:bg-white/5 hover:text-fg')}>
               <n.icon className="size-4" />{n.label}
             </NavLink>
           ))}
@@ -46,7 +46,7 @@ function OrgLayout({ org }: { org: Org }) {
           <a href={FAN_URL} target="_blank" rel="noopener" className="flex h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 text-sm font-medium text-muted transition hover:bg-surface-2 hover:text-fg"><DoorOpen className="size-4" />Fan app</a>
         </nav>
         <div className="absolute inset-x-3 bottom-4 hidden lg:block">
-          <div className="rounded-2xl border border-line bg-surface p-3">
+          <div className="card p-3">
             <div className="truncate text-sm font-semibold">{org.name}</div>
             <div className="truncate text-xs text-muted">{org.email}</div>
             <button className="mt-2 flex items-center gap-1.5 text-xs text-muted hover:text-fg" onClick={async () => { await post('/org/logout'); qc.setQueryData(['org-me'], null); }}><LogOut className="size-3.5" />Log out</button>
