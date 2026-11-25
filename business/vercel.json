@@ -5,7 +5,7 @@
   "buildCommand": "cd .. && npm run build -w business",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://pasi-business-api.onrender.com/api/:path*" },
+    { "source": "/api/:path*", "destination": "https://PASTE-BUSINESS-API-ADDRESS-HERE.herokuapp.com/api/:path*" },
     { "source": "/:path*", "destination": "/index.html" }
   ],
   "headers": [

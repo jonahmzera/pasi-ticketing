@@ -52,7 +52,7 @@ Other commands:
 
 ## Putting it online
 
-Follow **[DEPLOY.md](DEPLOY.md)**. It covers MongoDB Atlas (database), Render (the two API servers, from `render.yaml`) and Vercel (the two websites, from `web/vercel.json` and `business/vercel.json`).
+Follow **[DEPLOY.md](DEPLOY.md)**. It covers MongoDB Atlas (database), Heroku (the two API servers, from the `Procfile`), Vercel (the two websites, from `web/vercel.json` and `business/vercel.json`) and your own domain.
 
 ## Plugging in real services
 
