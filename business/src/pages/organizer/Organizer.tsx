@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { BarChart3, CalendarPlus, DoorOpen, LayoutDashboard, LogOut, ScanLine, Settings, ShieldCheck, Smartphone, Users, Wallet, Zap } from 'lucide-react';
 import { api, post } from '@shared/api';
 import { cn } from '@shared/utils';
-import { Logo } from '@shared/brand';
+import { Footer, Logo } from '@shared/brand';
 import { FAN_URL } from '@/env';
 import { Button, Field, Input, Segmented, Select, Skeleton } from '@shared/ui';
 import Overview from './Overview';
@@ -62,6 +62,7 @@ function OrgLayout({ org }: { org: Org }) {
             <Route path="events/:id/edit" element={<EventEditor />} />
             <Route path="settings" element={<OrgSettings org={org} />} />
           </Routes>
+          <Footer />
         </div>
       </main>
     </div>
@@ -125,6 +126,7 @@ function OrgAuth() {
           </form>
         </div>
       </div>
+      <Footer className="mx-auto mb-8 max-w-6xl px-4" />
     </div>
   );
 }

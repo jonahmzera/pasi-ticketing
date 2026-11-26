@@ -12,7 +12,6 @@
     "build": "npm run build -w web && npm run build -w business && npm run typecheck -w server",
     "start": "npm start -w server",
     "seed": "npm run seed -w server",
-    "heroku-postbuild": "echo API only: the websites deploy on Vercel",
     "typecheck": "npm run typecheck -w server && npm run typecheck -w web && npm run typecheck -w business"
   },
   "engines": {

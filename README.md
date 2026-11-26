@@ -1,5 +1,7 @@
 # Pasi: event ticketing for Kenyan venues
 
+By **JMCreations**. © 2026 JMCreations. All rights reserved.
+
 Pasi is two completely separate systems that share one database:
 
 | System | Folder | Dev address | What it is |
@@ -52,7 +54,7 @@ Other commands:
 
 ## Putting it online
 
-Follow **[DEPLOY.md](DEPLOY.md)**. It covers MongoDB Atlas (database), Heroku (the two API servers, from the `Procfile`), Vercel (the two websites, from `web/vercel.json` and `business/vercel.json`) and your own domain.
+Follow **[DEPLOY.md](DEPLOY.md)**. It covers MongoDB Atlas (database), Render (the two API servers, from `render.yaml`), Vercel (the two websites, from `web/vercel.json` and `business/vercel.json`) and your own domain.
 
 ## Plugging in real services
 

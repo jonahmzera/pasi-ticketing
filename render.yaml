@@ -1,0 +1,60 @@
+# Render Blueprint: two separate API services from this one repository.
+# Render → New → Blueprint → pick this repo. Secrets marked sync:false are asked for during setup.
+services:
+  - type: web
+    name: pasi-api                 # fan API (events, checkout, tickets, M-Pesa callback)
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm ci
+    startCommand: npm start -w server
+    healthCheckPath: /api/health
+    envVars:
+      - { key: SERVICE, value: public }
+      - { key: NODE_ENV, value: production }
+      - { key: NODE_VERSION, value: "22" }
+      - { key: MONGOMS_DISABLE_POSTINSTALL, value: "1" }
+      - { key: MONGODB_URI, sync: false }
+      - { key: TICKET_SECRET, sync: false }         # same value on both services (see DEPLOY.md)
+      - { key: PUBLIC_URL, sync: false }            # e.g. https://pasi.live
+      - { key: MPESA_MODE, value: simulate }
+      - { key: MPESA_CONSUMER_KEY, sync: false }
+      - { key: MPESA_CONSUMER_SECRET, sync: false }
+      - { key: MPESA_SHORTCODE, value: "174379" }
+      - { key: MPESA_PASSKEY, value: bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919 }
+      - { key: MPESA_CALLBACK_URL, sync: false }    # same as PUBLIC_URL
+      - { key: MPESA_CALLBACK_TOKEN, sync: false }  # same value on both services
+      - { key: SMS_PROVIDER, value: console }
+      - { key: AT_USERNAME, value: sandbox }
+      - { key: AT_API_KEY, sync: false }
+      - { key: VAPID_PUBLIC_KEY, sync: false }      # same pair on both services (see DEPLOY.md)
+      - { key: VAPID_PRIVATE_KEY, sync: false }
+
+  - type: web
+    name: pasi-business-api        # business API (dashboard + gate scanner) — never linked from the fan site
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm ci
+    startCommand: npm start -w server
+    healthCheckPath: /api/health
+    envVars:
+      - { key: SERVICE, value: business }
+      - { key: NODE_ENV, value: production }
+      - { key: NODE_VERSION, value: "22" }
+      - { key: MONGOMS_DISABLE_POSTINSTALL, value: "1" }
+      - { key: MONGODB_URI, sync: false }
+      - { key: TICKET_SECRET, sync: false }         # MUST be the same value as pasi-api's (signs ticket QR codes)
+      - { key: PUBLIC_URL, sync: false }            # the fan site address, for links in messages
+      - { key: MPESA_MODE, value: simulate }
+      - { key: MPESA_CONSUMER_KEY, sync: false }
+      - { key: MPESA_CONSUMER_SECRET, sync: false }
+      - { key: MPESA_SHORTCODE, value: "174379" }
+      - { key: MPESA_PASSKEY, value: bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919 }
+      - { key: MPESA_CALLBACK_URL, sync: false }    # the fan site address (callbacks go to the fan API)
+      - { key: MPESA_CALLBACK_TOKEN, sync: false }  # MUST be the same value as pasi-api's
+      - { key: SMS_PROVIDER, value: console }
+      - { key: AT_USERNAME, value: sandbox }
+      - { key: AT_API_KEY, sync: false }
+      - { key: VAPID_PUBLIC_KEY, sync: false }      # same pair on both services (see DEPLOY.md)
+      - { key: VAPID_PRIVATE_KEY, sync: false }

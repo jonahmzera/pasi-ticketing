@@ -9,3 +9,15 @@ export function Logo({ suffix, to = '/' }: { suffix?: string; to?: string }) {
     </Link>
   );
 }
+
+/** The company behind Pasi. */
+export const COMPANY = 'JMCreations';
+
+export function Footer({ className = '' }: { className?: string }) {
+  return (
+    <footer className={`mt-16 flex flex-col items-center gap-1 border-t border-white/5 pt-6 text-center text-xs text-muted ${className}`}>
+      <span><span className="font-semibold text-fg">Pasi</span> by <span className="font-display italic text-brand-soft">{COMPANY}</span></span>
+      <span>© {new Date().getFullYear()} {COMPANY}. All rights reserved.</span>
+    </footer>
+  );
+}

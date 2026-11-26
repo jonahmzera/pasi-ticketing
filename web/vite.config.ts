@@ -18,7 +18,7 @@ export default defineConfig({
       manifest: {
         name: 'Pasi — Events & Tickets',
         short_name: 'Pasi',
-        description: 'Find events, pay with M-Pesa, keep your tickets offline and plan with friends.',
+        description: 'Find events, pay with M-Pesa, keep your tickets offline and plan with friends. By JMCreations.',
         start_url: '/',
         display: 'standalone',
         background_color: '#05060d',

@@ -5,7 +5,7 @@
   "buildCommand": "cd .. && npm run build -w web",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://PASTE-FAN-API-ADDRESS-HERE.herokuapp.com/api/:path*" },
+    { "source": "/api/:path*", "destination": "https://pasi-api.onrender.com/api/:path*" },
     { "source": "/:path*", "destination": "/index.html" }
   ],
   "headers": [

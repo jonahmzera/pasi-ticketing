@@ -5,7 +5,7 @@ import { Bell, Compass, Download, Ticket, User, Users } from 'lucide-react';
 import { useMe } from '@/lib/hooks';
 import { GlassNav } from './glass-nav';
 import { cn } from '@shared/utils';
-import { Logo } from '@shared/brand';
+import { Footer, Logo } from '@shared/brand';
 export { Logo };
 
 type BIPEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<unknown> };
@@ -57,6 +57,7 @@ export function AppShell() {
             <Outlet />
           </motion.div>
         </AnimatePresence>
+        <Footer />
       </main>
 
       <GlassNav items={NAV} className="fixed inset-x-3 bottom-[calc(.75rem+env(safe-area-inset-bottom))] z-40 md:hidden" />

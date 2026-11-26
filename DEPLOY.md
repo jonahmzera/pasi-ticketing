@@ -1,60 +1,55 @@
-# Putting Pasi online: Vercel + Heroku + MongoDB Atlas (+ your own domain)
+# Putting Pasi online for free: Vercel + Render + MongoDB Atlas
 
 ```
- fans ──► pasi.live ───────────/api──► fan API (Heroku, Basic dyno, always on) ───┐
-                                                                                   ├──► MongoDB Atlas (free M0)
- staff ─► business.pasi.live ──/api──► business API (Heroku, Eco dyno) ───────────┘
+ fans ──► pasi-xxx.vercel.app ──────/api──► pasi-api.onrender.com ────────────┐
+                                                                              ├──► MongoDB Atlas (free M0)
+ staff ─► pasi-business-xxx.vercel.app ─/api─► pasi-business-api.onrender.com ┘
 ```
 
 | Piece | Where | Cost |
 |---|---|---|
-| Two websites | Vercel | Free |
-| Two API servers | Heroku | About $12/month, covered by the student credit ($13/month for 24 months) |
-| Database | MongoDB Atlas M0 | Free (the $50 student credit is for later, when you need a bigger cluster) |
-| Domain | Name.com, Namecheap or .TECH, from the student pack | Free for the first year |
+| Two websites | Vercel | Free, no card |
+| Two API servers | Render | Free, no card |
+| Database | MongoDB Atlas M0 | Free, no card |
+| Your own domain (optional) | Name.com, Namecheap or .TECH, from the student pack | Free for the first year |
 
 Each website forwards its own `/api` calls to its own server. Logins stay on the website's address, and the customer site never touches the business server.
 
-`pasi.live` is used as the example domain below. Use whichever domain you claim.
+Sign in to Render, Vercel and Atlas with **GitHub** (as jonahmzera), so there are no new passwords.
 
 ---
 
 ## 0. Push the latest code
+
+Render and Vercel deploy straight from GitHub:
 
 ```powershell
 git add -A
 ```
 
 ```powershell
-git commit -m "Heroku deploy setup"
+git commit -m "Switch deploy to Render free, JMCreations credit"
 ```
 
 ```powershell
 git push
 ```
 
-## 1. Claim the student offers
-
-1. Open **education.github.com/pack** while signed in to GitHub, and confirm your student status shows as approved.
-2. **Heroku:** create an account at **signup.heroku.com**. Then go to **heroku.com/github-students** and link your GitHub account to claim the credit.
-   - Heroku asks for a card to verify the account. The credit pays the bill, but keep an eye on **Billing** to make sure the total stays under $13.
-3. **Domain:** in the pack, open the **Name.com** offer (or Namecheap `.me`, or `.TECH`) and claim a free domain such as `pasi.live`.
-
-## 2. Database: MongoDB Atlas (about 5 minutes)
+## 1. Database: MongoDB Atlas (about 5 minutes)
 
 1. Go to **mongodb.com/cloud/atlas/register** and sign up with Google or GitHub.
 2. **Create a cluster**, choose **M0 / Free**, pick a region near Kenya (Cape Town or Frankfurt), and name it `pasi`.
 3. **Database Access** → **Add New Database User**.
    - Username: `pasi-app`.
    - Click **Autogenerate Secure Password** and save the password somewhere safe.
-4. **Network Access** → **Add IP Address** → **Allow access from anywhere** (`0.0.0.0/0`). Heroku servers don't have a fixed IP address, so the strong password is what protects the database.
+4. **Network Access** → **Add IP Address** → **Allow access from anywhere** (`0.0.0.0/0`). Render's free servers don't have a fixed IP address, so the strong password is what protects the database.
 5. **Connect** → **Drivers** → copy the link. Put your password in place of `<password>`, and add `pasi` before the `?`:
    `mongodb+srv://pasi-app:YOURPASSWORD@pasi.xxxxx.mongodb.net/pasi?retryWrites=true&w=majority`
    This is your **MONGODB_URI**. Keep it private.
 
-## 3. Make your secret keys (one time, on your computer)
+## 2. Make your secret keys (one time, on your computer)
 
-In the project folder, run each of these and save what they print:
+In the project folder, run each of these and save what they print in a private note:
 
 ```powershell
 npx web-push generate-vapid-keys
@@ -66,70 +61,52 @@ That gives the **VAPID public key** and **VAPID private key** (for push notifica
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-Run that one **twice**. The first result is your **TICKET_SECRET** (signs the ticket QR codes). The second is your **MPESA_CALLBACK_TOKEN** (proves M-Pesa callbacks are really from Safaricom's request).
+Run that one **twice**:
+- the first result is your **TICKET_SECRET** (signs the ticket QR codes);
+- the second is your **MPESA_CALLBACK_TOKEN** (checks that payment confirmations are genuine).
 
 Both servers must use **the same** values for all four keys.
 
-## 4. API servers: Heroku (about 15 minutes)
+## 3. API servers: Render (about 10 minutes)
 
-You make **two Heroku apps from the same GitHub repo**. The `SERVICE` setting decides which server each one runs.
+1. Go to **render.com** and **sign in with GitHub**. Render doesn't ask for a card for free services.
+2. Click **New** → **Blueprint** and choose the `pasi-ticketing` repository. Render reads `render.yaml` and sets up **pasi-api** and **pasi-business-api**.
+3. Render asks for the empty settings. Fill them in **the same on both services**:
 
-### 4a. The fan API
-
-1. Heroku dashboard → **New** → **Create new app**. Name it e.g. `pasi-api`, region **Europe**.
-2. **Settings** → **Reveal Config Vars**, and add:
-
-   | Key | Value |
+   | Setting | Value |
    |---|---|
-   | `SERVICE` | `public` |
-   | `NODE_ENV` | `production` |
-   | `MONGOMS_DISABLE_POSTINSTALL` | `1` |
-   | `MONGODB_URI` | your link from step 2 |
-   | `TICKET_SECRET` | from step 3 |
-   | `MPESA_CALLBACK_TOKEN` | from step 3 |
-   | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | from step 3 |
-   | `VAPID_SUBJECT` | `mailto:` followed by your email |
-   | `MPESA_MODE` | `simulate` (for now) |
-   | `SEED_DEMO` | `true` (only for the first deploy, to load demo events; delete it afterwards) |
+   | `MONGODB_URI` | your link from step 1 |
+   | `TICKET_SECRET` | from step 2 |
+   | `MPESA_CALLBACK_TOKEN` | from step 2 |
+   | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | from step 2 |
+   | `PUBLIC_URL`, `MPESA_CALLBACK_URL` | leave blank for now (step 6) |
+   | Daraja keys, `AT_API_KEY` | leave blank for now |
 
-3. **Deploy** → **Deployment method: GitHub** → connect and choose `pasi-ticketing`.
-   - Click **Enable Automatic Deploys** (branch `main`), then **Deploy Branch** once.
-4. **Resources** → **Change Dyno Type** → **Basic**. Basic never sleeps, so buyers never wait and the payment checker keeps running.
-5. Click **Open app** and add `/api/health` to the address. You should see `{"ok":true}`.
-   Copy the app's address (it looks like `https://pasi-api-1a2b3c4d5e6f.herokuapp.com`).
+4. Click **Apply** and wait for both to show **Live** (the first build takes a few minutes).
+5. **Optional, to start with demo events:** open **pasi-api** → **Environment**, add `SEED_DEMO` = `true`, and save. Once it has redeployed, delete `SEED_DEMO` again.
+6. Check each service's address at the top of its page.
+   - If they are exactly `https://pasi-api.onrender.com` and `https://pasi-business-api.onrender.com`, nothing to do.
+   - If Render added extra letters (because the name was taken), put the real addresses in the `destination` lines of `web/vercel.json` and `business/vercel.json`, then commit and push.
+7. Open `https://<pasi-api address>/api/health`. It should say `{"ok":true}`.
 
-### 4b. The business API
+## 4. Websites: Vercel (about 5 minutes)
 
-Same steps, with these differences:
+1. Go to **vercel.com** and **sign in with GitHub**.
+2. **Customer site:** **Add New** → **Project** → import `pasi-ticketing`.
+   - Set **Root Directory** to `web`, then **Deploy**.
+   - Copy its address, e.g. `https://pasi-xyz.vercel.app`.
+3. **Business site:** import the **same repo** again.
+   - Set **Root Directory** to `business`.
+   - Under **Environment Variables**, add `VITE_FAN_URL` = the customer site address from step 2.
+   - Click **Deploy**.
 
-- Name it e.g. `pasi-business-api`.
-- `SERVICE` = `business`.
-- Use the **same** `MONGODB_URI`, `TICKET_SECRET`, `MPESA_CALLBACK_TOKEN` and VAPID keys.
-- Don't add `SEED_DEMO`.
-- Dyno type **Eco** ($5/month, sleeps after 30 minutes idle; staff wait a few seconds on the first visit).
+## 5. Your own domain (optional, can be done later)
 
-Copy this app's address too.
-
-### 4c. Point the websites at the servers
-
-Open these two files and replace the placeholder addresses with the real ones from 4a and 4b:
-
-- `web/vercel.json`: replace `https://PASTE-FAN-API-ADDRESS-HERE.herokuapp.com` with the fan API address.
-- `business/vercel.json`: replace `https://PASTE-BUSINESS-API-ADDRESS-HERE.herokuapp.com` with the business API address.
-
-No slash at the end. Then commit and push.
-
-## 5. Websites: Vercel (about 5 minutes)
-
-1. Go to **vercel.com** and sign in with GitHub.
-2. **Customer site:** **Add New** → **Project** → import `pasi-ticketing`. Set **Root Directory** to `web`, then **Deploy**.
-3. **Business site:** import the **same repo** again. Set **Root Directory** to `business`, add the environment variable `VITE_FAN_URL` = `https://pasi.live`, then **Deploy**.
-
-## 6. Your domain
+If you claimed a free domain from the student pack, e.g. `pasi.live`:
 
 1. In Vercel, open the **customer** project → **Settings** → **Domains** → add `pasi.live` (and `www.pasi.live` when it offers).
 2. Open the **business** project → **Settings** → **Domains** → add `business.pasi.live`.
-3. Vercel shows the DNS records to create. Go to your domain's DNS settings (Name.com → **My Domains** → your domain → **Manage DNS Records**) and add exactly what Vercel shows. It is usually:
+3. Vercel shows the DNS records to create. Add exactly those at your domain's DNS settings (Name.com → **My Domains** → your domain → **Manage DNS Records**). Usually:
 
    | Type | Host | Value |
    |---|---|---|
@@ -137,43 +114,42 @@ No slash at the end. Then commit and push.
    | `CNAME` | `www` | `cname.vercel-dns.com` |
    | `CNAME` | `business` | `cname.vercel-dns.com` |
 
-4. Wait until Vercel shows **Valid Configuration** next to each domain (from a few minutes up to a few hours). Vercel adds HTTPS by itself.
+4. Wait until Vercel shows **Valid Configuration** (minutes to a few hours). HTTPS is added for you.
+5. Change `VITE_FAN_URL` on the business project to `https://pasi.live` and click **Redeploy**.
 
-The Heroku servers don't need the domain. The websites reach them through `/api`.
+## 6. Connect everything
 
-## 7. Connect everything
+On Render, open **pasi-api** and **pasi-business-api** → **Environment**. On both, set:
 
-On **both** Heroku apps → **Settings** → **Config Vars**, set:
+- `PUBLIC_URL` = the customer site address (your domain, or the `vercel.app` one)
+- `MPESA_CALLBACK_URL` = the same address
 
-- `PUBLIC_URL` = `https://pasi.live`
-- `MPESA_CALLBACK_URL` = `https://pasi.live`
+Save, and both services redeploy.
 
-Heroku restarts both apps by itself. If you changed `VITE_FAN_URL` after the business site's first build, click **Redeploy** on that Vercel project.
+## 7. Try it
 
-## 8. Try it
-
-- **Customer site** (`pasi.live`): buy a ticket. While `MPESA_MODE=simulate`, approve the payment at `https://pasi.live/simulator`.
-- **Business site** (`business.pasi.live`): log in with `demo@pasi.test` / `demo12345` (only if you used `SEED_DEMO`; change it before real use), create and publish an event, and try the gate scanner at `/scan` on a phone.
-- Delete `SEED_DEMO` from the fan API's config vars once the demo data is in.
+- **Customer site:** buy a ticket. While `MPESA_MODE=simulate`, approve the payment at `<customer site>/simulator`.
+- **Business site:** log in with `demo@pasi.test` / `demo12345` (only if you used `SEED_DEMO`; change it before real use), create and publish an event, and try the gate scanner at `/scan` on a phone.
 
 ## If something goes wrong
 
-- **Heroku → More → View logs** shows the server's errors.
+- **Render → the service → Logs** shows the server's errors.
   - `MongoServerError: bad auth`: the password inside `MONGODB_URI` is wrong.
-  - `connection timed out` to Atlas: step 2.4 (allow `0.0.0.0/0`) is missing.
-- **The site loads but every action fails:** the address in `web/vercel.json` or `business/vercel.json` is wrong. Open `https://pasi.live/api/health`; it should say `{"ok":true}`.
-- **Tickets from one server fail to scan on the other:** `TICKET_SECRET` differs between the two Heroku apps.
+  - `connection timed out` to Atlas: step 1.4 (allow `0.0.0.0/0`) is missing.
+- **The site loads but every action fails:** the address in `web/vercel.json` or `business/vercel.json` is wrong, or the server is still waking up. Open `<customer site>/api/health`; it should say `{"ok":true}`.
+- **Tickets fail to scan at the gate:** `TICKET_SECRET` differs between the two Render services.
 
-## Going live with real M-Pesa later
+## Things to know about the free tier
 
-1. Get your PayBill or Till "go-live" approval on developer.safaricom.co.ke.
-2. On **both** Heroku apps, set `MPESA_MODE=production` plus your real `MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, `MPESA_SHORTCODE` and `MPESA_PASSKEY`.
-3. Safaricom reaches the fan server through `MPESA_CALLBACK_URL` (your domain).
+- **Render free servers sleep after about 15 minutes with no visits.** The next visitor waits about 30 to 60 seconds while it wakes up. Payment checks for missed M-Pesa callbacks also pause while it sleeps, and resume when it wakes.
+- That's fine for testing and showing people. **Before real ticket sales**, move **pasi-api** to an always-on plan (Render Starter about $7/month, or Heroku with your student credit once you have a bank card it accepts).
+- **Atlas M0** gives you 512 MB, enough for tens of thousands of orders.
+- **Built-in protection:** per-IP limits on checkout, login and the gate PIN; one M-Pesa payment in progress per phone; a ticket limit per phone.
 
-**Before real customers use it**, set `SMS_PROVIDER=africastalking` plus `AT_USERNAME` and `AT_API_KEY` on the fan API. Until then, the login code is shown on screen for testing, which means anyone could sign in as any phone number.
+## Before real customers
 
-## Optional student-pack extras
-
-- **Sentry:** emails you when the live site throws an error. Ask and it can be wired in.
-- **Doppler:** keeps the secret keys in one place and syncs them to both Heroku apps, instead of pasting them twice.
-- **Atlas $50 credit:** apply it when you move off the free M0 cluster.
+- **SMS:** set `SMS_PROVIDER=africastalking` plus `AT_USERNAME` and `AT_API_KEY` on pasi-api. Until then, the login code is shown on screen for testing, which means anyone could sign in as any phone number.
+- **Real M-Pesa:**
+  1. Get your PayBill or Till "go-live" approval on developer.safaricom.co.ke.
+  2. On **both** Render services, set `MPESA_MODE=production` plus your real `MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, `MPESA_SHORTCODE` and `MPESA_PASSKEY`.
+- The demo M-Pesa phone (`/simulator`) only shows payment prompts started from the customer site. Door sales from the scanner need `MPESA_MODE=sandbox` or `production` to try them out.
